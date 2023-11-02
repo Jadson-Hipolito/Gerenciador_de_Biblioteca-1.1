@@ -49,16 +49,29 @@ void menu_cliente(void){
 
 void cadastrar_cliente(cliente *clientes, int *num_clientes) {
     if (*num_clientes < tamanho_max) {
+        FILE *arquivo;
+        arquivo = fopen("clientes.txt", "a"); // Abre o arquivo em modo de adição
+
+        if (arquivo == NULL) {
+            printf("Erro ao abrir o arquivo.\n");
+            return;
+        }
+
         printf("Digite o nome do cliente: ");
         scanf("%s", clientes[*num_clientes].nome);
+        fprintf(arquivo, "Nome: %s\n", clientes[*num_clientes].nome);
 
         printf("Digite o endereço do cliente: ");
         scanf("%s", clientes[*num_clientes].endereco);
+        fprintf(arquivo, "Endereço: %s\n", clientes[*num_clientes].endereco);
 
         printf("Digite o telefone do cliente: ");
         scanf("%s", clientes[*num_clientes].telefone);
+        fprintf(arquivo, "Telefone: %s\n", clientes[*num_clientes].telefone);
 
-        (num_clientes)++;
+        fclose(arquivo); // Fecha o arquivo
+
+        (*num_clientes)++;
     } else {
         printf("Limite máximo de clientes atingido.\n");
     }
@@ -74,82 +87,116 @@ void listar_clientes(const cliente *clientes, int *num_clientes) {
     }
 }
 
-void editar_cliente(cliente *clientes, int *num_clientes) {
+void listar_clientes() {
+    FILE *arquivo;
+    arquivo = fopen("clientes.txt", "r"); // Abre o arquivo em modo de leitura
+
+    if (arquivo == NULL) {
+        printf("Erro ao abrir o arquivo.\n");
+        return;
+    }
+
+    printf("Lista de Clientes:\n");
+    
+    char linha[100]; // Suponha que cada linha do arquivo tenha no máximo 100 caracteres
+    while (fgets(linha, sizeof(linha), arquivo) != NULL) {
+        printf("%s", linha);
+    }
+
+    fclose(arquivo); // Fecha o arquivo
+}
+
+void editar_cliente() {
+    FILE *arquivo;
+    arquivo = fopen("clientes.txt", "r+"); // Abre o arquivo em modo de leitura e escrita
+
+    if (arquivo == NULL) {
+        printf("Erro ao abrir o arquivo.\n");
+        return;
+    }
+
     int codigo;
     int mudar;
     char confir;
     printf("Digite o cpf do cliente ao qual deseja pesquisar: ");
     scanf("%d", &codigo);
-    int indice = -1;
-    for (int i = 0; i < *num_clientes; i++) {
-        if (clientes[i].cpf == codigo) {
-            indice = i;
+    
+    char linha[100]; // Suponha que cada linha do arquivo tenha no máximo 100 caracteres
+    int encontrado = 0;
+    long int posicao = ftell(arquivo); // Para controlar a posição do arquivo
+    while (fgets(linha, sizeof(linha), arquivo) != NULL) {
+        if (sscanf(linha, "CPF: %d", &codigo) == 1) {
+            encontrado = 1;
             break;
         }
+        posicao = ftell(arquivo); // Atualiza a posição do arquivo
     }
 
-    if (indice == -1) {
+    if (!encontrado) {
         printf("Cliente não encontrado.\n");
+        fclose(arquivo);
         return;
     }
+
+    // Leu a posição correta, agora pode reescrever os dados se necessário.
     printf("Informações atuais do cliente:\n");
-    printf("Nome: %s\n", clientes[indice].nome);
-    printf("Endereço: %s\n", clientes[indice].endereco);
-    printf("Telefone: %s\n", clientes[indice].telefone);
+    printf("%s", linha);
 
-  printf("\n████████████████████████████████████████████████████████████████████████████\n");
-  printf("████████████████████████████████████████████████████████████████████████████\n");
-  printf("█████████████████████████████<Editor de cliente>████████████████████████████\n");
-  printf("████████████████████████████████████████████████████████████████████████████\n");
-  printf("████████████████████████████████████████████████████████████████████████████\n\n");
-  printf("               ██████████████████████████████████████████████\n");
-  printf("              ████████████████████████████████████████████████\n");
-  printf("             █████ 1-Mudar Nome do Cliente                █████\n");
-  printf("            █████  2-Mudar Endereço do Cliente             █████\n");
-  printf("            █████  3-Mudar Numero do Cliente               █████\n");
-  printf("            █████  4-Mudar CPF do Cliente                  █████\n");
-  printf("            █████  5-Deletar Registro do Cliente           █████\n");
-  printf("             █████ 0-Retornar para o menu principal       █████\n");
-  printf("              ████████████████████████████████████████████████\n");
-  printf("               ██████████████████████████████████████████████\n\n");
-  scanf("%d", &mudar);
-  switch (mudar) {
+    printf("\n████████████████████████████████████████████████████████████████████████████\n");
+    printf("████████████████████████████████████████████████████████████████████████████\n");
+    printf("█████████████████████████████<Editor de cliente>████████████████████████████\n");
+    printf("████████████████████████████████████████████████████████████████████████████\n");
+    printf("████████████████████████████████████████████████████████████████████████████\n\n");
+    printf("               ██████████████████████████████████████████████\n");
+    printf("              ████████████████████████████████████████████████\n");
+    printf("             █████ 1-Mudar Nome do Cliente                █████\n");
+    printf("            █████  2-Mudar Endereço do Cliente             █████\n");
+    printf("            █████  3-Mudar Numero do Cliente               █████\n");
+    printf("            █████  4-Mudar CPF do Cliente                  █████\n");
+    printf("            █████  5-Deletar Registro do Cliente           █████\n");
+    printf("             █████ 0-Retornar para o menu principal       █████\n");
+    printf("              ████████████████████████████████████████████████\n");
+    printf("               ██████████████████████████████████████████████\n\n");
+    scanf("%d", &mudar);
 
-   case 1:
-    printf("Nome: ");
-    scanf("%s", clientes[indice].nome);
-    break;
+    char novoValor[100]; // Suponha que cada campo tem no máximo 100 caracteres
+    switch (mudar) {
+        case 1:
+            printf("Nome: ");
+            scanf("%s", novoValor);
+            sprintf(linha, "Nome: %s\n", novoValor);
+            break;
+        case 2:
+            printf("Endereço: ");
+            scanf("%s", novoValor);
+            sprintf(linha, "Endereço: %s\n", novoValor);
+            break;
+        case 3:
+            printf("Telefone: ");
+            scanf("%s", novoValor);
+            sprintf(linha, "Telefone: %s\n", novoValor);
+            break;
+        case 4:
+            printf("Cpf: ");
+            scanf("%s", novoValor);
+            sprintf(linha, "CPF: %s\n", novoValor);
+            break;
+        case 5:
+            printf("Tem certeza que deseja deletar o registro desse cliente? Digite 0, para cancelar.");
+            scanf(" %c", &confir); // Note o espaço antes de %c para ignorar espaços em branco.
+            if (confir != '0') {
+                fseek(arquivo, posicao, SEEK_SET); // Retorna para a posição correta
+                fprintf(arquivo, ""); // Remove o registro
+                printf("Cliente deletado com sucesso.\n");
+            }
+            break;
+        case 0:
+            printf("Programa finalizado.\n");
+            break;
+        default:
+            printf("Opção inválida. Tente novamente.\n");
+    }
 
-   case 2:
-    printf("Endereço: ");
-    scanf("%s", clientes[indice].endereco);
-    break;
-
-   case 3:
-    printf("Telefone: ");
-    scanf("%s", clientes[indice].telefone);
-    break;
-
-   case 4:
-    printf("Cpf: ");
-    scanf("%s", clientes[indice].cpf);
-    break;
-
-   case 5:
-    printf("Tem certeza que deseja deletar o registro desse cliente? Digite 0, para cancelar.");
-    scanf("%s", &confir);
-    if (confir != 0)
-     for (int i = indice; i < (*num_clientes - 1); i++) {
-      clientes[i] = clientes[i + 1];
-     }
-    (num_clientes)--;
-    printf("Cliente deletado com sucesso.\n");
-
-   case 0:
-    printf("Programa finalizado.\n");
-    break;
-    
-   default:
-    printf("Opção inválida. Tente novamente.\n");
-  }
+    // Fecha o arquivo após as operações
+    fclose(arquivo);
 }
