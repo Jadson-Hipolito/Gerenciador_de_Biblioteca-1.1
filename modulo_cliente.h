@@ -10,6 +10,7 @@ typedef struct {
     char endereco[max_nome];
     char telefone[max_nome];
     char cpf[max_nome];
+    int id;
     int  ativ;
 } cliente;
 

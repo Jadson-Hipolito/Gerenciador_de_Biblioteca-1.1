@@ -47,44 +47,57 @@ void menu_cliente(void){
   }
 }
 
+#include <stdio.h>
+
+#define tamanho_max 100
+
+typedef struct {
+    char nome[max_nome];
+    char endereco[max_nome];
+    char telefone[max_nome];
+    char cpf[max_nome];
+    int id;
+    int  ativ;
+} cliente;
+
 void cadastrar_cliente(cliente *clientes, int *num_clientes) {
     if (*num_clientes < tamanho_max) {
-        FILE *arquivo;
-        arquivo = fopen("clientes.txt", "a"); // Abre o arquivo em modo de adição
+        FILE *arquivo = fopen("clientes.txt", "a"); // Abra o arquivo em modo de escrita (append).
 
-        if (arquivo == NULL) {
+        if (arquivo != NULL) {
+            printf("Digite o nome do cliente: ");
+            scanf("%s", clientes[*num_clientes].nome);
+
+            printf("Digite o endereço do cliente: ");
+            scanf("%s", clientes[*num_clientes].endereco);
+
+            printf("Digite o telefone do cliente: ");
+            scanf("%s", clientes[*num_clientes].telefone);
+
+            clientes[*num_clientes].ativ = 1; // Adicione automaticamente a atividade.
+
+            // Salve os detalhes do cliente no arquivo.
+            fprintf(arquivo, "Nome: %s\nEndereço: %s\nTelefone: %s\nAtividade: %d\n\n",
+                    clientes[*num_clientes].nome, clientes[*num_clientes].endereco,
+                    clientes[*num_clientes].telefone, clientes[*num_clientes].ativ);
+
+            (*num_clientes)++;
+            fclose(arquivo);
+        } else {
             printf("Erro ao abrir o arquivo.\n");
-            return;
         }
-
-        printf("Digite o nome do cliente: ");
-        scanf("%s", clientes[*num_clientes].nome);
-        fprintf(arquivo, "Nome: %s\n", clientes[*num_clientes].nome);
-
-        printf("Digite o endereço do cliente: ");
-        scanf("%s", clientes[*num_clientes].endereco);
-        fprintf(arquivo, "Endereço: %s\n", clientes[*num_clientes].endereco);
-
-        printf("Digite o telefone do cliente: ");
-        scanf("%s", clientes[*num_clientes].telefone);
-        fprintf(arquivo, "Telefone: %s\n", clientes[*num_clientes].telefone);
-
-        fclose(arquivo); // Fecha o arquivo
-
-        (*num_clientes)++;
     } else {
         printf("Limite máximo de clientes atingido.\n");
     }
 }
 
-void listar_clientes(const cliente *clientes, int *num_clientes) {
-    printf("Lista de Clientes:\n");
-    for (int i = 0; i < *num_clientes; i++) {
-        printf("Nome: %s\n", clientes[i].nome);
-        printf("Endereço: %s\n", clientes[i].endereco);
-        printf("Telefone: %s\n", clientes[i].telefone);
-        printf("\n");
-    }
+int main() {
+    cliente clientes[tamanho_max];
+    int num_clientes = 0;
+
+    cadastrar_cliente(clientes, &num_clientes);
+
+    return 0;
 }
 
 void listar_clientes() {
@@ -138,7 +151,6 @@ void editar_cliente() {
         return;
     }
 
-    // Leu a posição correta, agora pode reescrever os dados se necessário.
     printf("Informações atuais do cliente:\n");
     printf("%s", linha);
 
@@ -182,14 +194,27 @@ void editar_cliente() {
             sprintf(linha, "CPF: %s\n", novoValor);
             break;
         case 5:
-            printf("Tem certeza que deseja deletar o registro desse cliente? Digite 0, para cancelar.");
-            scanf(" %c", &confir); // Note o espaço antes de %c para ignorar espaços em branco.
-            if (confir != '0') {
-                fseek(arquivo, posicao, SEEK_SET); // Retorna para a posição correta
-                fprintf(arquivo, ""); // Remove o registro
-                printf("Cliente deletado com sucesso.\n");
-            }
-            break;
+            printf("Tem certeza que deseja marcar o cliente como inativo? Digite 0 para cancelar ou 1 para confirmar: ");
+            scanf(" %c", &confir);
+            if (confir == '1') {
+              linha[strlen(linha) - 1] = '0'; // Altera o último caractere para '0' (inativo).
+              fseek(arquivo, posicao, SEEK_SET);
+              fprintf(arquivo, "%s", linha); // Atualiza o registro no arquivo.
+              printf("Cliente marcado como inativo.\n");
+    }
+    break;
+        case 6:
+            printf("Tem certeza que deseja deletar o registro deste cliente? Digite 0 para cancelar ou 1 para confirmar: ");
+            scanf(" %c", &confir);
+            if (confir == '1') {
+              char id[100]; // Suponha que cada campo tem no máximo 100 caracteres
+              sscanf(linha, "ID: %s", id); // Extrai o ID do cliente
+              sprintf(linha, "ID: %s\nAtividade: 0\n", id); // Marca o cliente como inativo
+             fseek(arquivo, posicao, SEEK_SET);
+             fprintf(arquivo, "%s", linha); // Atualiza o registro no arquivo.
+             printf("Cliente deletado com sucesso.\n");
+    }
+    break;
         case 0:
             printf("Programa finalizado.\n");
             break;
