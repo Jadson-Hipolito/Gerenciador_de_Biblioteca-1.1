@@ -15,9 +15,9 @@ typedef struct {
 } cliente;
 
 void menu_cliente(void);
-void cadastrar_cliente(cliente *clientes, int *num_clientes);
-void listar_clientes(const cliente *clientes, int *num_clientes);
-void editar_cliente(cliente *clientes, int *num_clientes);
+void cadastrar_cliente();
+void listar_clientes();
+void editar_cliente();
 // Outras funções relacionadas aos clientes, se necessário
 
 #endif // CLIENTE_H

@@ -10,12 +10,14 @@ typedef struct funcio{
     char nome[max_nome];
     float salario;
     int telefone;
-    int endereco;
+    char endereco[max_nome];
     char cpf[max_cpf];
+    int id;
+    int ativ;
 } funcionario;
 
 void menu_funcio(void);
-void editar_funcionario(funcionario *funcionarios, int *num_funcionarios);
+void editar_funcionario();
 void cadastrar_funcionario(funcionario *funcionarios, int *num_funcionarios);
 void listar_funcionarios(const funcionario *funcionarios, int *num_funcionarios);
 // Outras funções relacionadas aos funcionários, se necessário
